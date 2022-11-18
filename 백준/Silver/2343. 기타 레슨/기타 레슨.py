@@ -1,28 +1,22 @@
-import sys
-input = sys.stdin.readline
-
-def Count(x):
+def count(x):
     cnt = 1
     tot = 0
     for i in lecture:
-        if tot+i > x:
+        tot += i
+        if tot>x:
             cnt += 1
             tot = i
-        else:
-            tot += i
     return cnt
 
 n, m = map(int, input().split())
 lecture = list(map(int, input().split()))
-large = max(lecture)
-
-lt = max(lecture)
+lt = 1
 rt = sum(lecture)
 res = 0
 
-while lt <= rt:
+while lt<=rt:
     mid = (lt+rt)//2
-    if mid >= large and Count(mid) <= m:
+    if count(mid) <= m and mid>=max(lecture):
         res = mid
         rt = mid-1
     else:
