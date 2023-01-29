@@ -1,5 +1,3 @@
-
-
 import java.io.*;
 import java.util.*;
 
@@ -70,6 +68,7 @@ public class Main {
 		Arrays.fill(visit, false);
 		
 		dist[start] = 0;
+		visit[start] = true;
 		PriorityQueue<Node> q = new PriorityQueue<>((o1, o2) -> o1.cost - o2.cost);
 		q.offer(new Node(start, 0));
 		
