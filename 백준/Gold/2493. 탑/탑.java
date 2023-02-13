@@ -22,15 +22,13 @@ public class Main {
 		
 		StringTokenizer st = new StringTokenizer(br.readLine());
 		for(int i = 0; i<N; i++) {
-//			System.out.println(stack);
-//			System.out.print("인덱스");
-//			System.out.println(idx_stack);
 			boolean ifPop = false;
 			int tmp = Integer.parseInt(st.nextToken());
 			if(stack.isEmpty()) { //스택이 비었을 때
 				stack.push(tmp);
 				idx_stack.push(i+1);
 			}
+			
 			else if(stack.peek() <= tmp) { //스택.peek이 자기보다 같거나 작으면
 				while(!stack.isEmpty() && stack.peek()<tmp) { //스택이 비거나 스택.peek이 자기보다 클때까지 pop
 					stack.pop();
@@ -45,21 +43,19 @@ public class Main {
 				stack.push(tmp);
 				idx_stack.push(i+1);	
 			}
-			else {
-				res[i] = idx_stack.peek();
-				stack.push(tmp);
+			
+			else { //스택.peek이 자기보다 크면
+				res[i] = idx_stack.peek(); //res배열 처리 후
+				stack.push(tmp); //stack에 넣기
 				idx_stack.push(i+1);
 				}
 						
 			}
-
-
+		
         for(int i = 0; i<N; i++){
             System.out.print(res[i] + " ");
         }
 				
-		
-		
 	}
 
 }
