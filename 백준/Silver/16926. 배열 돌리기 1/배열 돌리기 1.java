@@ -3,17 +3,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
-//순서: 우하좌상
-//시작 위치 정하기
-//map[0][0] 값 빼놓기
-
 public class Main {
 
-	static int[] dx = {0,1,0,-1};
-	static int[] dy = {1,0,-1,0};
-	static int[][] map; 
 	static int N;
 	static int M;
+	static int[] dx = {0,1,0,-1};
+	static int[] dy = {1,0,-1,0};
+	static int[][] map;
 	
 	public static void main(String[] args) throws IOException {
 
@@ -42,20 +38,22 @@ public class Main {
 			} System.out.println();
 		}
 		
+		
 	}
 
 	private static void rotate() {
-		
+
 		int start = Math.min(N, M)/2;
 		for(int s = 0; s<start; s++) {
 			
 			int x = s;
-			int y = s;
+			int y = s; 
 			int dir = 0;
 			
-			int temp = map[x][y];
+			int tmp = map[x][y];
 			
 			while(dir<4) {
+				
 				int nx = dx[dir] + x;
 				int ny = dy[dir] + y;
 				
@@ -69,8 +67,9 @@ public class Main {
 				else dir++;
 			}
 			
-			map[s+1][s] = temp;
+			map[s+1][s] = tmp;
 		}
 		
 	}
+
 }
