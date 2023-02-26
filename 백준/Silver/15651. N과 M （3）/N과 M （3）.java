@@ -6,31 +6,23 @@ import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.StringTokenizer;
 
-/**
- * 230208 
- * 1. N과 M 3, 4
- * 2. 프로그래머스 완전탐색 레벨 1
- * 3. 조이스틱 코드 다시 보기
- * 4. 시간 남으면 하노이
- */
+public class Main {
 
-class Main {
-
-	static int N;
-	static int M;
+	static int N, M;
 	static int[] picked;
+//	static boolean[] isSelected;
 	static BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
-	
-	public static void main(String[] args) throws IOException{
+	public static void main(String[] args) throws IOException {
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st = new StringTokenizer(br.readLine());
 		
 		N = Integer.parseInt(st.nextToken());
 		M = Integer.parseInt(st.nextToken());
-		picked = new int[M];
 		
-		duplicatePermutation(0);
+		picked = new int[M];
+		permutation(0);
+//		isSelected = new boolean[N];
 		
 		br.close();
 		bw.flush();
@@ -38,20 +30,18 @@ class Main {
 		
 	}
 	
-	private static void duplicatePermutation(int cnt) throws IOException {
-
+	private static void permutation(int cnt) throws IOException {
 		if(cnt == M) {
 			for(int i = 0; i<M; i++) {
-				bw.write(String.valueOf(picked[i]) + " ");
-			} 
-			bw.newLine();
+				bw.write(picked[i] + " ");
+			} bw.newLine();
 			return;
 		}
 		
-		for(int i = 1; i<=N; i++) {
-			picked[cnt] = i;
-			duplicatePermutation(cnt+1);
+		for(int i = 0; i<N; i++) {
+			picked[cnt] = i+1;
+			permutation(cnt+1);
 		}
-	}
 		
+	}
 }
