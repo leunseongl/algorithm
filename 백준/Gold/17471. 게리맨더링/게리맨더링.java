@@ -8,20 +8,24 @@ import java.util.List;
 import java.util.Queue;
 import java.util.StringTokenizer;
 
-/* 부분집합, BFS */
+/* 부분집합, bfs */
+/**
+ * 인덱스는 1부터 받아줄 필요가 없다
+ * 각 구는 1부터 N까지지지만 간선 정보를 -1해서 받아주고 0부터 처리해주면 됨
+ */
 public class Main {
 
 	static int N;
 	static int[] population;
-	static boolean[] select;
 	static List<List<Integer>> graph = new ArrayList<>();
+	static boolean[] isSelected;
 	static int res = Integer.MAX_VALUE;
 	public static void main(String[] args) throws NumberFormatException, IOException {
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		N = Integer.parseInt(br.readLine()); //구역의 개수 N
+		N = Integer.parseInt(br.readLine());
 		
-		population = new int[N]; //각 구역별 인원 수
+		population = new int[N];
 		StringTokenizer st = new StringTokenizer(br.readLine());
 		for(int i = 0; i<N; i++) {
 			population[i] = Integer.parseInt(st.nextToken());
@@ -32,84 +36,69 @@ public class Main {
 			graph.add(new ArrayList<>());
 		}
 		
-		for(int i = 0; i<N; i++) {
+		for(int i  = 0; i<N; i++) {
 			st = new StringTokenizer(br.readLine());
-			int n = Integer.parseInt(st.nextToken());
-			for(int j = 0; j<n; j++) {
-				int tmp = Integer.parseInt(st.nextToken());
-				graph.get(i).add(tmp-1);
+			int cnt = Integer.parseInt(st.nextToken());
+			for(int j = 0; j<cnt; j++) {
+				graph.get(i).add(Integer.parseInt(st.nextToken())-1);
 			}
 		}
 		//입력 완료
 		
-		//부분집합 돌리기
-		select = new boolean[N];
+		isSelected = new boolean[N];
 		divide(0);
+		System.out.println(res == Integer.MAX_VALUE ? -1 : res);
 		
-		
-		System.out.println(res == Integer.MAX_VALUE? -1 : res);
 	}
-	
-	//부분집합으로 선거구 나누기
-	private static void divide(int cnt) {
-		if(cnt == N) {
+
+	private static void divide(int idx) {
+		//기저 조건
+		if(idx == N) {
 			List<Integer> listA = new ArrayList<>();
 			List<Integer> listB = new ArrayList<>();
 			for(int i = 0; i<N; i++) {
-				if(select[i]) {
-					listA.add(i);
-				}
-				
-				else {
-					listB.add(i);
-				}
+				if(isSelected[i]) listA.add(i);
+				else if(!isSelected[i]) listB.add(i);
 			}
 			
-			//조건처리 -> 선거구는 구역을 적어도 하나 포함해야 함, 몰빵되면 bfs를 돌리지 않음
+			//bfs 돌리기 전 몰빵된 곳 제거
 			if(listA.size() == 0 || listB.size() == 0) return;
 			
-			if(bfs(listA) && bfs(listB)) { //두 선거구 모두 연결이 됐을 경우
-				//두 개의 인구 차 최솟값
-				int sumA = 0;
-				int sumB = 0;
+			if(bfs(listA) && bfs(listB)) {
+				//최소값 연산
+				int sum = 0;
 				for(int a : listA) {
-					sumA += population[a];
+					sum += population[a];
 				}
 				for(int b : listB) {
-					sumB += population[b];
+					sum -= population[b];
 				}
-				res = Math.min(res, Math.abs(sumA-sumB));
+				res = Math.min(res, Math.abs(sum));
 			}
-			
 			return;
-			
 		}
 		
-		select[cnt] = true;
-		divide(cnt+1);
+		isSelected[idx] = true;
+		divide(idx+1);
 		
-		select[cnt] = false;
-		divide(cnt+1);
-		
+		isSelected[idx] = false;
+		divide(idx+1);
 	}
-	
-	//시작점부터 갈 수 있는 곳 다 가기
+
 	private static boolean bfs(List<Integer> list) {
-		//몇 개 구가 연결 되어있는지 count를 세고
-		//탐색 후에 list.size()랑 count랑 같으면 true반환
 		
 		boolean[] visit = new boolean[N];
-		
-		Queue<Integer> q = new ArrayDeque<>(); //큐에는 구역이 들어가고, 내 코드는 0번부터
-		q.offer(list.get(0));
-		visit[list.get(0)] = true; //시작점 방문처리 (까먹지 말자..)
 		int count = 0;
+		
+		Queue<Integer> q = new ArrayDeque<>();
+		q.offer(list.get(0));
+		visit[list.get(0)] = true;
 		
 		while(!q.isEmpty()) {
 			int tmp = q.poll();
 			count++;
 			for(int o : graph.get(tmp)) {
-				if(!visit[o] && list.contains(o)) { //방문 안했고, 나한테서 갈 수 있고, 현재 리스트에 있는 경우
+				if(!visit[o] && list.contains(o)) {
 					visit[o] = true;
 					q.offer(o);
 				}
@@ -117,5 +106,4 @@ public class Main {
 		}
 		return count == list.size();
 	}
-
 }
