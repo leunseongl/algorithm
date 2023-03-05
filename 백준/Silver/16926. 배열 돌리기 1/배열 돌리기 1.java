@@ -3,22 +3,22 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
-public class Main {
+//반시계방향 회전
+class Main {
 
-	static int N;
-	static int M;
+	//우 하 좌 상
 	static int[] dx = {0,1,0,-1};
 	static int[] dy = {1,0,-1,0};
-	static int[][] map;
 	
+	static int N, M;
+	static int[][] map;
 	public static void main(String[] args) throws IOException {
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st = new StringTokenizer(br.readLine());
-		
 		N = Integer.parseInt(st.nextToken());
 		M = Integer.parseInt(st.nextToken());
-		int R = Integer.parseInt(st.nextToken());
+		int R = Integer.parseInt(st.nextToken()); //회전의 개수
 		
 		map = new int[N][M];
 		for(int i = 0; i<N; i++) {
@@ -38,35 +38,28 @@ public class Main {
 			} System.out.println();
 		}
 		
-		
 	}
-
+	
 	private static void rotate() {
 
-		int start = Math.min(N, M)/2;
+		int start = Math.min(N, M)/2; //한 번 배열을 돌릴 때 시작점
 		for(int s = 0; s<start; s++) {
 			
 			int x = s;
 			int y = s; 
 			int dir = 0;
-			
 			int tmp = map[x][y];
 			
 			while(dir<4) {
-				
-				int nx = dx[dir] + x;
-				int ny = dy[dir] + y;
-				
+				int nx = x+dx[dir];
+				int ny = y+dy[dir];
 				if(nx>=s && nx<N-s && ny>=s && ny<M-s) {
 					map[x][y] = map[nx][ny];
-					
 					x = nx;
 					y = ny;
 				}
-				
 				else dir++;
 			}
-			
 			map[s+1][s] = tmp;
 		}
 		
