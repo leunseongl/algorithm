@@ -9,33 +9,27 @@ import java.util.StringTokenizer;
 
 public class Main {
 
-	//0개수 세서 녹이기용
-	static class Info {
-		int x, y, sea;
-		
-		public Info(int x, int y, int sea) {
+	static int[] dx = {-1, 0, 1, 0};
+	static int[] dy = {0, 1, 0, -1};
+	
+	static class Iceberg {
+		int x, y, cnt;
+		public Iceberg(int x, int y, int cnt) {
 			this.x = x;
 			this.y = y;
-			this.sea = sea;
+			this.cnt = cnt;
+		}
+		@Override
+		public String toString() {
+			return "Iceberg [x=" + x + ", y=" + y + ", cnt=" + cnt + "]";
 		}
 	}
-	
-	//bfs용
-	static class Node {
-		int x, y;
-		
-		public Node(int x, int y) {
-			this.x = x;
-			this.y = y;
-		}
-	}
-	
-	static int[] dx = {0,1,0,-1};
-	static int[] dy = {1,0,-1,0};
+
 	static int N, M;
 	static int[][] map;
+	static boolean[][] visit;
 	public static void main(String[] args) throws IOException {
-		
+
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st = new StringTokenizer(br.readLine());
 		N = Integer.parseInt(st.nextToken());
@@ -52,94 +46,87 @@ public class Main {
 		
 		int year = 0;
 		while(true) {
-			
-			if(isZero()) { //모두 녹았을 경우
+			if(isZero()) {
 				System.out.println(0);
 				break;
 			}
-			
 			year++;
-			List<Info> list = seaCount();
-			melt(list);
-			int lump = bfs();
+
+			melt(); //녹이기
 			
-			if(lump > 1) {
+			visit = new boolean[N][M];
+			
+			int count = 0;
+			for(int i = 0; i<N; i++) {
+				for(int j = 0; j<M; j++) {
+					if(map[i][j] > 0 && !visit[i][j]) {
+						count++;
+						visit[i][j] = true;
+						dfs(i, j);
+					}
+				}
+			}
+			
+			if(count>=2) {
 				System.out.println(year);
-				break; //덩어리가 1보다 클 경우 break
+				break;
 			}
 		}
-		
 	}
 	
-	//인접 바다(0) 개수 세기
-	private static List<Info> seaCount() {
-		List<Info> list = new ArrayList<>();
+	private static void melt() {
+		
+		List<Iceberg> list = new ArrayList<>();
+		
+		//녹일 애들 저장
 		for(int i = 0; i<N; i++) {
 			for(int j = 0; j<M; j++) {
-				if(map[i][j] != 0) {
-					int count = 0; //인접 바다 개수 
+				if(map[i][j] > 0) { //빙산이면
+					int count = 0;
+					
 					for(int k = 0; k<4; k++) {
 						int nx = i+dx[k];
 						int ny = j+dy[k];
+						
 						if(map[nx][ny] == 0) count++;
 					}
-					list.add(new Info(i, j, count));
+					list.add(new Iceberg(i, j, count));
 				}
 			}
 		}
 		
-		return list;
-	}
-	
-	//녹이기
-	private static void melt(List<Info> list) {
+		//녹이기
 		for(int i = 0; i<list.size(); i++) {
-			Info tmp = list.get(i);
-			if(map[tmp.x][tmp.y] - tmp.sea <= 0) map[tmp.x][tmp.y] = 0;
-			else map[tmp.x][tmp.y] = map[tmp.x][tmp.y] -= tmp.sea;
+			Iceberg cur = list.get(i);
+			if(map[cur.x][cur.y] - cur.cnt <= 0) map[cur.x][cur.y] = 0;
+			else map[cur.x][cur.y] -= cur.cnt;
 		}
 	}
 	
-	//덩어리 탐색
-	private static int bfs() {
-		int lump = 0; //덩어리 개수
-		boolean[][] visit = new boolean[N][M]; //방문 처리
+	//dfs
+	private static void dfs(int x, int y) {
 		
-		Queue<Node> q = new ArrayDeque<>();
-		
-		for(int i = 0; i<N; i++) {
-			for(int j = 0; j<M; j++) {
-				if(map[i][j] != 0 && !visit[i][j]) {
-					q.offer(new Node(i, j));
-					visit[i][j] = true;
-					lump++;
-					
-					while(!q.isEmpty()) {
-						Node cur = q.poll();
-						
-						for(int k = 0; k<4; k++) {
-							int nx = dx[k] + cur.x;
-							int ny = dy[k] + cur.y;
-							
-							if(nx>=0 && nx<N && ny>=0 && ny<M && !visit[nx][ny] && map[nx][ny]!=0) {
-								visit[nx][ny] = true;
-								q.offer(new Node(nx, ny));
-							}
-						}
-					}
+		for(int i = 0; i<4; i++) {
+			int nx = x + dx[i];
+			int ny = y + dy[i];
+			
+			if(nx>=0 && nx<N && ny>=0 && ny<M) {
+				if(!visit[nx][ny] && map[nx][ny] != 0) {
+					visit[nx][ny] = true;
+					dfs(nx, ny);
 				}
 			}
 		}
-		return lump;
+		
 	}
 	
-	//모두 녹았는지를 판단하는 메서드
 	private static boolean isZero() {
 		for(int i = 0; i<N; i++) {
 			for(int j = 0; j<M; j++) {
 				if(map[i][j] != 0) return false;
-			}	
+			}
 		}
 		return true;
 	}
+	
 }
