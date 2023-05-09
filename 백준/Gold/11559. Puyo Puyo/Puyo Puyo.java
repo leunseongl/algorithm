@@ -9,123 +9,110 @@ import java.util.Stack;
 
 public class Main {
 
-    static int[] dx = { 0, -1, 0, 1 };
-    static int[] dy = { -1, 0, 1, 0 };
+	static int[] dx = {0,-1,0,1};
+	static int[] dy = {-1,0,1,0};
+	
+	static class Node {
+		int x, y;
+		public Node(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+	}
+	
+	static char[][] map;
+	static boolean[][] visit;
+	static Stack<Character> stack = new Stack<>();
+	static int chain;
+	public static void main(String[] args) throws IOException {
+		
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		
+		map = new char[12][6];
+		for(int i = 0; i<12; i++) {
+			String line = br.readLine();
+			map[i] = line.toCharArray();
+		}
+		//입력 완료
+		
+		chain = 0; 
+		game();
+		System.out.println(chain);
+		
+	}
+	
+	private static void game() {
+		
+		boolean isOver = false;
+		while(!isOver) {
+			isOver = true;
+			visit = new boolean[12][6];
+			for(int i = 0; i<12; i++) {
+				for(int j = 0; j<6; j++) {
+					if(map[i][j] != '.') {
+						if(bfs(i, j)) {
+							isOver = false;
+						}
+					}
+				}
+			}
+			if(!isOver) {
+				down();
+				chain++;
+			}
+		}
+		
+	}
+	
+	private static void down() {
+		for(int i = 0; i<6; i++) {
+			for(int j = 0; j<12; j++) {
+				if(map[j][i] != '.') {
+					stack.push(map[j][i]);
+					map[j][i] = '.';
+				}
+			}
+			int x = 11;
+			while(!stack.isEmpty()) {
+				map[x--][i] = stack.pop();
+			}
+		}
+	}
 
-    static class Node {
-        int x, y;
+	private static boolean bfs(int x, int y) {
 
-        public Node(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        @Override
-        public String toString() {
-            return "Node [x=" + x + ", y=" + y + "]";
-        }
-    }
-
-    static char[][] field;
-    static Stack<Character> stack = new Stack<>(); //내리기 메소드용
-    static boolean[][] visit;
-    static int chain = 0;
-    public static void main(String[] args) throws IOException {
-
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
-        field = new char[12][6];
-        for (int i = 0; i < 12; i++) {
-            char[] cArr = br.readLine().toCharArray();
-            for (int j = 0; j < 6; j++) {
-                field[i][j] = cArr[j];
-            }
-        }
-        // 입력 완료
-
-        game();
-        System.out.println(chain);
-    }
-
-    private static void game() {
-        boolean isOver = false; // 게임이 끝났는지의 여부
-        while (!isOver) {
-            isOver = true;
-            // 새 연쇄가 시작될 때마다 visit 배열 만들기
-            visit = new boolean[12][6];
-            for (int i = 0; i < 12; i++) {
-                for (int j = 0; j < 6; j++) {
-                    if (field[i][j] != '.') { // 빈 공간이 아니면
-                    	if(bfs(i, j)) {
-                            isOver = false; //하나라도 못깨면 isOver가 바뀌지 않음
-                        }
-                    }
-                }
-            }
-            if(!isOver) { //하나라도 깼으면 연쇄+1
-            	down();
-            	chain++;
-            }
-        }
-    }
-
-    // 터질 수 있는 뿌요 찾고, 부시기
-    private static boolean bfs(int x, int y) {
-        List<Node> list = new ArrayList<>(); // 부술 애들 저장
-        list.add(new Node(x, y)); //현재 값 꼭 넣어주기!!!!!
-        
-        Queue<Node> q = new ArrayDeque<>();
-        q.offer(new Node(x, y));
-        visit[x][y] = true;
-
-        while (!q.isEmpty()) {
-            Node cur = q.poll();
-
-            for (int i = 0; i < 4; i++) {
-                int nx = cur.x + dx[i];
-                int ny = cur.y + dy[i];
-
-                if (nx >= 0 && nx < 12 && ny >= 0 && ny < 6) {
-                    if (!visit[nx][ny] && field[cur.x][cur.y] == field[nx][ny]) {
-                        // 조건을 다 충족하면
-                        q.offer(new Node(nx, ny)); // 큐에 넣고
-                        visit[nx][ny] = true; // 방문처리
-                        list.add(new Node(nx, ny)); // 부수기 위해 list에 저장
-                    }
-                }
-            }
-
-        }
-
-        // list에 부술 애들이 4개 이상이 아니라면 false 반환
-        if (list.size() < 4) {
-        	return false;
-        }
-
-        // 4개 이상이라면 부수고 true 반환
-        else {
-            for (int k = 0; k < list.size(); k++) {
-                int bx = list.get(k).x;
-                int by = list.get(k).y;
-                field[bx][by] = '.';
-            }
-        }
-        return true;
-    }
-    
-    // 내리기
-    private static void down() {
-    	for(int i = 0; i<6; i++) {
-    		for(int j = 0; j<12; j++) {
-    			if(field[j][i] != '.' ) {
-    				stack.push(field[j][i]);
-    				field[j][i] = '.';
-    			}
-    		}
-    		int x = 11; //12-1
-    		while(!stack.isEmpty()) {
-    			field[x--][i] = stack.pop();
-    		}
-    	}	
-    }
+		List<Node> bomb = new ArrayList<>();
+		bomb.add(new Node(x, y));
+		
+		Queue<Node> q = new ArrayDeque<>();
+		q.offer(new Node(x, y));
+		visit[x][y] = true;
+		
+		while(!q.isEmpty()) {
+			Node cur = q.poll();
+			
+			for(int k = 0; k<4; k++) {
+				int nx = cur.x + dx[k];
+				int ny = cur.y + dy[k];
+				
+				if(nx>=0 && nx<12 && ny>=0 && ny<6) {
+					if(!visit[nx][ny] && map[nx][ny] == map[cur.x][cur.y]) {
+						visit[nx][ny] = true;
+						bomb.add(new Node(nx, ny));
+						q.offer(new Node(nx, ny));
+					}
+				}
+			}
+		}
+		if(bomb.size()<4) {
+			return false;
+		}
+		else {
+			for(Node n: bomb) {
+				map[n.x][n.y] = '.';
+			}
+			return true;
+		}
+	}
+	
 }
