@@ -6,104 +6,84 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
+//0은 빈칸, 1은 집, 2는 치킨집
 public class Main {
-	
-	static class Node {
-		int x; //행
-		int y; //열
-		public Node(int x, int y) {
+
+	static class Area {
+		int x,y;
+		public Area(int x, int y) {
 			this.x = x;
 			this.y = y;
 		}
-		@Override
-		public String toString() {
-			return "Node [x=" + x + ", y=" + y + "]";
-		}
-		
-		
 	}
 	
-	static int M;
+	static int N, M;
 	static int[][] city;
-	static List<Node> chicken = new ArrayList<>(); //치킨집 좌표
-	static List<Node> home = new ArrayList<>(); //집 좌표
-	static int chickenN; //치킨집 개수
-	static int homeN; //집 개수
+	static List<Area> home;
+	static List<Area> chickenshop;
 	static int[] picked;
-	static int cityChickenDist = Integer.MAX_VALUE;
-	
+	static int res;
 	public static void main(String[] args) throws IOException {
-		
+
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st = new StringTokenizer(br.readLine());
-		
-		int N = Integer.parseInt(st.nextToken());
+		N = Integer.parseInt(st.nextToken());
 		M = Integer.parseInt(st.nextToken());
 		
 		city = new int[N][N];
 		for(int i = 0; i<N; i++) {
 			st = new StringTokenizer(br.readLine());
 			for(int j = 0; j<N; j++) {
-				city[i][j] = Integer.parseInt(st.nextToken());
+			city[i][j] = Integer.parseInt(st.nextToken());	
 			}
-		}
-		
-		//치킨집 좌표, 집 좌표 저장
+		} 
+
+		//치킨집, 집 좌표 저장
+		home = new ArrayList<>();
+		chickenshop = new ArrayList<>();
 		for(int i = 0; i<N; i++) {
 			for(int j = 0; j<N; j++) {
-				if(city[i][j] == 2)  {
-					chicken.add(new Node(i, j));
-				}
-				
-				if(city[i][j] == 1) {
-					home.add(new Node(i, j));
-				}
+				if(city[i][j] == 1) home.add(new Area(i, j));
+				if(city[i][j] == 2) chickenshop.add(new Area(i, j));
 			}
 		}
 		
-		chickenN = chicken.size();
-		homeN =	home.size();
 		picked = new int[M];
-		//치킨집 조합 구하기
+		res = Integer.MAX_VALUE;
 		combination(0, 0);
-		System.out.println(cityChickenDist);
+		
+		System.out.println(res);
 	}
-	
-	//조합은 index 번호로만
+
 	private static void combination(int cnt, int start) {
 		
-		if(cnt == M) {
-			cityChickenDist = Math.min(cityChickenDist, chickDist());
+		if(cnt == M) { 
+			res = Math.min(distance(picked), res);
 			return;
 		}
-		
-		for(int i = start; i<chickenN; i++) {
+		for(int i = start; i<chickenshop.size(); i++) {
 			picked[cnt] = i;
 			combination(cnt+1, i+1);
 		}
-
 	}
-	
-	private static int chickDist() {
+ 	
+	//뽑힌 조합을 인자로
+	private static int distance(int[] arr) {
+		//집을 기준으로 집과 가장 가까운 치킨집 사이의 거리 => 치킨 거리
+		//모든 집의 치킨거리 합 => 도시의 치킨 거리
+		//이 함수는 도시의 치킨 거리를 리턴하는 함수
+		//리턴해서 위에서 가장 작은 도시의 치킨거리를 구해야 함
 		
-		int tot = 0;
-		//치킨거리: 치킨집-집 중 가장 작은 것
-		for(int i = 0; i<homeN; i++) {
-			int hx = home.get(i).x;
-			int hy = home.get(i).y;
-			int disTmp = Integer.MAX_VALUE;
-			for(int j = 0; j<picked.length; j++) { 
-				int cx = chicken.get(picked[j]).x;
-				int cy = chicken.get(picked[j]).y;
-				disTmp = Math.min(disTmp, Math.abs(cx-hx)+Math.abs(cy-hy));
+		int cityDistance = 0;
+		for(int i = 0; i<home.size(); i++) {
+			int chickenDist = Integer.MAX_VALUE;
+			for(int j = 0; j<arr.length; j++) {
+				int r = Math.abs(home.get(i).x - chickenshop.get(arr[j]).x);
+				int c = Math.abs(home.get(i).y - chickenshop.get(arr[j]).y);
+				if(r+c<chickenDist) chickenDist = r+c;
 			}
-
-			tot += disTmp;
-			
+			cityDistance += chickenDist;
 		}
-		
-		return tot;
-				
+		 return cityDistance;
 	}
-
 }
