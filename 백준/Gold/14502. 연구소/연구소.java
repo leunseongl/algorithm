@@ -1,101 +1,114 @@
-import java.io.*;
-import java.util.*;
-
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.StringTokenizer;
 
 public class Main {
+
+	static int[] dx = {-1, 0, 1, 0};
+	static int[] dy = {0, -1, 0, 1};
 	
-	static int[] dx = {1,0,-1,0};
-	static int[] dy = {0,-1,0,1};
-	static int n,m;
-	static int[][] arr;
-	static int res = Integer.MIN_VALUE;
-	
-	static class xy {
-		int x;
-		int y;
-		xy(int x, int y) {
+	static class Node {
+		int x, y;
+		public Node(int x, int y) {
 			this.x = x;
 			this.y = y;
 		}
 	}
 	
-	public static void wall(int cnt) {
+	static int N, M, answer;
+	static int[][] lab;
+	public static void main(String[] args) throws IOException {
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st = new StringTokenizer(br.readLine());
+		N = Integer.parseInt(st.nextToken());
+		M = Integer.parseInt(st.nextToken());
+		
+		lab = new int[N][M];
+		for(int i = 0; i<N; i++) {
+			st = new StringTokenizer(br.readLine());
+			for(int j = 0; j<M; j++) {
+				lab[i][j] = Integer.parseInt(st.nextToken());
+			}
+		}
+		//입력 완료
+		
+		answer = Integer.MIN_VALUE;
+		combination(0,0);
+		
+		System.out.println(answer);
+	}
+	
+	//벽 세우기 - 조합
+	private static void combination(int cnt, int start) {
+		
 		if(cnt == 3) {
 			bfs();
 			return;
 		}
-		for(int i = 0; i<n; i++) {
-			for(int j = 0; j<m; j++) {
-				if(arr[i][j] == 0) {
-					arr[i][j] = 1;
-					wall(cnt+1);
-					arr[i][j] = 0;
-					
-				}
+		
+		for(int i = start; i<N*M; i++) {
+			int x = i/M;
+			int y = i%M;
+			
+			if(lab[x][y] == 0) {
+				lab[x][y] = 1;
+				combination(cnt+1, i+1);
+				lab[x][y] = 0;
 			}
 		}
 	}
 	
-	public static void bfs() {
-		int[][] copy = new int[n][m];
-
-		for(int i = 0; i<n; i++) {
-			for(int j = 0; j<m; j++) {
-				copy[i][j] = arr[i][j];
+	//바이러스 퍼트리고, 안전영역 갯수 세기 - bfs
+	private static void bfs() {
+		
+		int[][] copy = new int[N][M];
+		for(int i = 0; i<N; i++) {
+			for(int j = 0; j<M; j++) {
+				copy[i][j] = lab[i][j];
 			}
 		}
+		//배열 복사 완료
 		
-		Queue<xy> q = new LinkedList<>();
-		for(int i = 0; i<n; i++) {
-			for(int j = 0; j<m; j++) {
-				if(copy[i][j] == 2) {
-					q.add(new xy(i, j));
+		boolean[][] visit = new boolean[N][M];
+		Queue<Node> q = new ArrayDeque<>();
+		
+		for(int i = 0; i<N; i++) {
+			for(int j = 0; j<M; j++) {
+				if(copy[i][j] == 2) { //바이러스면
+					visit[i][j] = true;
+					q.offer(new Node(i, j));
 				}
 			}
 		}
 		
 		while(!q.isEmpty()) {
-			xy z = q.poll();
+			Node cur = q.poll();
 			
 			for(int k = 0; k<4; k++) {
-				int nx = dx[k] + z.x;
-				int ny = dy[k] + z.y;
+				int nx = cur.x + dx[k];
+				int ny = cur.y + dy[k];
 				
-				if(nx>=0 && nx<n && ny>=0 && ny<m && copy[nx][ny] == 0) {
-					q.offer(new xy(nx, ny));
-					copy[nx][ny] = 2;
+				if(nx>=0 && nx<N && ny>=0 && ny<M) {
+					if(!visit[nx][ny] && copy[nx][ny]==0) {
+						copy[nx][ny] = 2; //바이러스로 만들기
+						visit[nx][ny] = true;
+						q.offer(new Node(nx, ny));
+					}
 				}
 			}
 		}
 		
-		int tmp = 0;
-		for(int i = 0; i<n; i++) {
-			for(int j = 0; j<m; j++) {
-				if(copy[i][j] == 0) tmp++;
+		//안전영역 세기
+		int safe = 0;
+		for(int i = 0; i<N; i++) {
+			for(int j = 0; j<M; j++) {
+				if(copy[i][j] == 0) safe++;
 			}
 		}
-		
-		res = Math.max(tmp, res);
-		
-	}
-	
-	public static void main(String[] args) throws IOException {
-		
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer nm = new StringTokenizer(br.readLine());
-		n = Integer.parseInt(nm.nextToken());
-		m = Integer.parseInt(nm.nextToken());
-		
-		arr = new int[n][m];
-		for(int i = 0; i<n; i++) {
-			StringTokenizer st = new StringTokenizer(br.readLine());
-			for(int j = 0; j<m; j++) {
-				arr[i][j] = Integer.parseInt(st.nextToken());
-			}
-		}
-		
-		wall(0);
-		System.out.println(res);	
-		
+		answer = Math.max(answer, safe);
 	}
 }
