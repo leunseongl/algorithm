@@ -1,61 +1,60 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.StringTokenizer;
 
-/* 가능한 경우의 수에서 적은 비용 */
 public class Solution {
 
-	static int res;
-	static int[] charge;
 	static int[] plan;
-	public static void main(String[] args) throws NumberFormatException, IOException {
-		
+	static int[] charge;
+	static int answer;
+	public static void main(String[] args) throws IOException {
+
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		int T = Integer.parseInt(br.readLine());
 		
+		int T = Integer.parseInt(br.readLine());
 		for(int tc = 1; tc<=T; tc++) {
-			//이용권 가격들 입력
 			charge = new int[4];
 			StringTokenizer st = new StringTokenizer(br.readLine());
 			for(int i = 0; i<4; i++) {
 				charge[i] = Integer.parseInt(st.nextToken());
 			}
 			
-			//이용 계획 입력
-			plan = new int[13];
+			plan = new int[12];
 			st = new StringTokenizer(br.readLine());
-			for(int i = 1; i<=12; i++) {
+			for(int i = 0; i<12; i++) {
 				plan[i] = Integer.parseInt(st.nextToken());
 			}
 			//입력 완료
 			
-			res = charge[3]; //1년치 비용으로 초기화
-			dfs(1, 0);
-			System.out.printf("#%d %d%n", tc, res);
+			answer = charge[3];
+			dfs(0,0);
 			
+			System.out.printf("#%d %d%n", tc, answer);
 		}
 	}
 	
 	private static void dfs(int month, int sum) {
 		
-		if(month >= 13) {
-			res = Math.min(res, sum);
+		if(month >= 12) {
+			//System.out.println(sum);
+			answer = Math.min(answer, sum);
 			return;
 		}
 		
-		//이용안할 떄 안사기
-		if(plan[month] == 0) dfs(month+1, sum);
+		//이용 안할 때
+		if(plan[month] == 0) 
+			dfs(month+1, sum);
 		
-		//1일 이용권 
-		dfs(month+1, sum + plan[month] * charge[0]);
+		//1일 이용권
+		dfs(month+1, sum + charge[0] * plan[month]);
 		
-		//한 달 이용권
+		//1달 이용권
 		dfs(month+1, sum + charge[1]);
 		
 		//3달 이용권
 		dfs(month+3, sum + charge[2]);
 		
 	}
+
 }
