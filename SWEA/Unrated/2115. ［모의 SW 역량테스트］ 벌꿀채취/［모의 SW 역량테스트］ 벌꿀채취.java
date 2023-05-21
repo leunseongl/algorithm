@@ -1,14 +1,14 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.StringTokenizer;
-/* 조합, 부분집합 */
+
 public class Solution {
 
-	static int N, M, C;
-	static int[][] box;
-	static boolean[][] visit;
-	static int maxNum = 0;
+	static int N,M,C,answer,tmp1,tmp2;
+	static int[][] map;
+	static int[][] select;
 	public static void main(String[] args) throws NumberFormatException, IOException {
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -16,83 +16,90 @@ public class Solution {
 		
 		for(int tc = 1; tc<=T; tc++) {
 			StringTokenizer st = new StringTokenizer(br.readLine());
-			N = Integer.parseInt(st.nextToken()); //한 변의 길이
-			M = Integer.parseInt(st.nextToken()); //채취할 수 있는 벌통의 수
-			C = Integer.parseInt(st.nextToken()); //두 일꾼이 채취할 수 있는 꿀의 양
+			N = Integer.parseInt(st.nextToken()); //N*N
+			M = Integer.parseInt(st.nextToken()); //한 명의 일꾼이 채취할 수 있는 벌통의 수
+			C = Integer.parseInt(st.nextToken()); //한 명의 일꾼이 채취할 수 있는 꿀의 최대 양
 			
-			box = new int[N][N];
+			map = new int[N][N];
 			for(int i = 0; i<N; i++) {
 				st = new StringTokenizer(br.readLine());
 				for(int j = 0; j<N; j++) {
-					box[i][j] = Integer.parseInt(st.nextToken());
+					map[i][j] = Integer.parseInt(st.nextToken());
 				}
 			}
 			//입력 완료
 			
-			visit = new boolean[N][N];
-			System.out.printf("#%d %d%n", tc, combination());
+			answer = Integer.MIN_VALUE;
+			select = new int[2][M];
+			combination(0,0);
 			
-			
+			System.out.printf("#%d %d%n", tc, answer);
 		}
 		
 	}
 	
-	private static int combination() {
+	//벌통 선택 조합
+	private static void combination(int cnt, int start) {
 		
-		int result = 0;
-		int max1 = 0;
-		int max2 = 0;
-		for(int i = 0; i<N; i++) { //첫 행부터
-			for(int j = 0; j<=N-M; j++) { //첫 열부터 벌통 선택할 수 있는 열(N-M)까지
-				
-				//일꾼1 벌통 선택 시작
-				maxNum = 0; //일꾼1이 벌통을 다시 선택하므로 이익 0으로 초기화
-				//x좌표, y좌표, 벌통의 개수, 채취한 꿀의 양, 얻은 이익
-				getHoney(i, j, 0, 0, 0);
-				max1 = maxNum; //j열에서 벌통을 선택했을 때, 일꾼1이 얻은 최대 이익
-				
-				//일꾼2 벌통 선택 시작
-				maxNum = 0; //일꾼2가 벌통을 선택할 차례, 이익 0으로 초기화
-				max2 = 0; //일꾼1의 선택이 바뀌었으므로, 일꾼2의 이익도 0으로 초기화
-				
-				//일꾼2는 일꾼1이 선택한 다음 열부터 선택 시작
-				for(int j2 = j+M; j2<=N-M; j2++) {
-					getHoney(i, j2, 0, 0, 0);
-					max2 = Math.max(max2, maxNum); 
-				}
-				
-				//일꾼2는 다른 행에서 벌통을 선택하는게 더 클수도 있다
-				//일꾼1의 다음 행부터 살펴보기
-				for(int i2 = i+1; i2<N; i2++) {
-					for(int j2 = 0; j2<=N-M; j2++) { // 첫 열부터 벌통 선택할 수 있는 열(N-M)까지
-						getHoney(i2, j2, 0, 0, 0);
-						max2 = Math.max(max2, maxNum);
-					}
-				}
-				//일꾼1이 벌통을 새로 선택했을 떄마다 전체 이익 최댓값으로 갱신
-				result = Math.max(result, max1+max2);
-			}
-		}
-		return result;
-	}
-
-	/* 부분집합 */
-	private static void getHoney(int x, int y, int cnt, int sum, int benefit) {
-
-		//채취한 꿀이 최대 채취 양을 넘었으면 그냥 return
-		if(sum > C) return;
-		
-		//벌통 M개 선택했으면 
-		if(cnt == M) {
-			//최대 이익 갱신
-			if(maxNum < benefit) maxNum = benefit;
+		//일꾼 두 명 벌꿀 선택 완료
+		if(cnt == 2) {
+//			for(int i = 0; i<2; i++) {
+//				System.out.println(Arrays.toString(select[i]));
+//			}
+			//부분집합으로 수익 계산하러 이동
+			tmp1 = 0; //현재 뽑은 조합 중 일꾼 1의 최대 수익
+			tmp2 = 0; //현재 뽑은 조합 중 현재 일꾼 2의 최대 수익
+			subset1(0,0,0);
+			subset2(0,0,0);
+			answer = Math.max(answer, tmp1+tmp2);
 			return;
 		}
 		
-		//선택
-		getHoney(x, y+1, cnt+1, sum+box[x][y], benefit+box[x][y]*box[x][y]);
+		for(int i = start; i<N*N; i++) {
+			int x = i/N;
+			int y = i%N;
+			if(N-M<y) continue; //어차피 못가는 곳 자르기
+			
+			for(int j = 0; j<M; j++) { //선택된 꿀 정보에 넣기
+				select[cnt][j] = map[x][y+j];
+			}
+			
+			//다음 일꾼 벌통 선택
+			combination(cnt+1, i+M);
+		}
+	}
+	
+	//수익 계산 부분집합
+	private static void subset1(int cnt, int sum, int profit) {
 		
-		//비선택
-		getHoney(x, y+1, cnt+1, sum, benefit);
+		if(sum>C) return;
+		
+		if(cnt==M) {
+			if(C>=sum) { //최대양을 넘지 않으면
+				//System.out.println(sum);
+				tmp1 = Math.max(tmp1, profit);
+			}
+			return;
+		}
+		
+		subset1(cnt+1, sum+select[0][cnt], profit+(select[0][cnt]*select[0][cnt]));
+		subset1(cnt+1, sum, profit);
+	}
+	
+	//수익 계산 부분집합
+	private static void subset2(int cnt, int sum, int profit) {
+		
+		if(sum>C) return;
+		
+		if(cnt==M) {
+			if(C>=sum) { //최대양을 넘지 않으면
+				//System.out.println(sum);
+				tmp2 = Math.max(tmp2, profit);
+			}
+			return;
+		}
+		
+		subset2(cnt+1, sum+select[1][cnt], profit+(select[1][cnt]*select[1][cnt]));
+		subset2(cnt+1, sum, profit);
 	}
 }
