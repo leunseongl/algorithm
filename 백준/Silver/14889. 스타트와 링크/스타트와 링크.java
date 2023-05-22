@@ -6,39 +6,39 @@ import java.util.StringTokenizer;
 
 public class Main {
 
-	static int N;
-	static int answer;
+	static int N,answer;
 	static int[][] map;
-	static boolean[] select;
+	static boolean[] isSelect;
 	public static void main(String[] args) throws NumberFormatException, IOException {
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		N = Integer.parseInt(br.readLine());
-		map = new int[N][N];
 		
+		map = new int[N][N];
 		for(int i = 0; i<N; i++) {
 			StringTokenizer st = new StringTokenizer(br.readLine());
 			for(int j = 0; j<N; j++) {
 				map[i][j] = Integer.parseInt(st.nextToken());
 			}
 		}
+		//입력 완료
 		
 		answer = Integer.MAX_VALUE;
-		select = new boolean[N];
+		isSelect = new boolean[N];
 		combination(0,0);
 		
 		System.out.println(answer);
 	}
-	
-	private static void combination(int cnt, int start) {
 
+	private static void combination(int cnt, int start) {
+		
 		if(cnt == N/2) {
 			int sum1 = 0;
 			int sum2 = 0;
 			for(int i = 0; i<N; i++) {
 				for(int j = 0; j<N; j++) {
-					if(select[i] && select[j]) sum1+=map[i][j];
-					else if(!select[i] && !select[j]) sum2+=map[i][j];
+					if(isSelect[i] && isSelect[j]) sum1+=map[i][j];
+					else if(!isSelect[i] && !isSelect[j]) sum2+=map[i][j];
 				}
 			}
 			answer = Math.min(answer, Math.abs(sum1-sum2));
@@ -46,11 +46,9 @@ public class Main {
 		}
 		
 		for(int i = start; i<N; i++) {
-			select[i] = true;
+			isSelect[i] = true;
 			combination(cnt+1, i+1);
-			select[i] = false;
+			isSelect[i] = false;
 		}
-		
 	}
-
 }
